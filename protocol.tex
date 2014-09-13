@@ -1,0 +1,216 @@
+\documentclass[12pt]{article}
+\usepackage{amssymb}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[section]%[thm]
+\newtheorem{lemma}{Lemma}[section]%
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{remark}{Remark}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{conjecture}{Conjecture}[section]
+\newenvironment{proof}{\noindent {\em {Proof}}.}{$\square$\medskip}
+\newcommand{\property}[1]{\newline \noindent {\bf \emph{#1}.}}
+
+\def\nor{\underline{\triangleleft}\ }
+\def \im {\Longrightarrow }
+\def \sn {\triangleleft \triangleleft}
+\def \din {\indent\indent}
+\def \dqu {\quad\quad}
+
+\newcommand{\ret}{\Longrightarrow}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\M}{\mathcal{M}}
+\newcommand{\Fr}{\mathcal{F}}
+\newcommand{\Zn}{\mathbb{Z}/n\mathbb{Z}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\ZZ}[1]{\mathbb{Z}/#1\mathbb{Z}}
+\newcommand{\abs}[1]{\left\vert#1\right\vert}
+\newcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\seq}[1]{\left<#1\right>}
+\newcommand{\norm}[1]{\left\Vert#1\right\Vert}
+\newcommand{\essnorm}[1]{\norm{#1}_{\ess}}
+
+\title{LoST protocol}
+\author{Implementation details}
+
+
+\begin{document}
+\maketitle
+
+\section{LoST protocol}
+A cloud server claims to have a file stored in its repository located in a certain region. 
+Our aim is to design a protocol, called LoST, that can verify that the file is residing in the 
+claimed region. The problem of verifying whether a server have a certain file or not, 
+is called proof of retrieval or POR in brief.
+To design LoST, we use a combination of POR protocol in \cite{POR}, and computing round trip time (RTT).
+In POR, an encoding of a file is sent to the cloud server from the user and then the user 
+challenge responses the cloud server to verify that the file is actually stored in the server. 
+Computing RTT is a method that estimates the location of a server, usually in a wireless network, by 
+sending a number of packets from different known locations and measuring the RTT of 
+the packets. The devices that send these packets to the server are called landmarks.
+Therefore, LoST uses RTT to estimate the location of the cloud server that has stored a 
+file, but instead of sending arbitrary packets as in RTT, landmarks challenge responses the cloud server 
+using POR, to verify that the server has stored the claimed file. 
+
+\subsection{Setup}
+In our protocol, by challenge responding the cloud server, we mean that the 
+POR scheme in \cite{POR} is used to verify the file content. Therefore our 
+protocol is actually an RTT protocol over Internet (not a wireless network) 
+using the challenge response in POR. 
+
+We restrict our experiment for 30 landmarks spread over North America and Europe. 
+Then for a cloud server in these regions, we use about 10 landmarks to estimate the 
+location of cloud server. For wireless networks, usually 3 landmarks are used to estimate 
+the server location, but since Internet is not as reliable as a wireless network, we use 
+10 landmarks for one cloud server to output a region with smaller boundaries. 
+
+The landmarks are carefully selected from the planet lab nodes. We selected the nodes that 
+had better computation times and their up time was more reliable. 
+
+\subsection{LoST phases}
+The LoST protocol has three phases:
+\begin{itemize}
+\item Learning phase: The protocol is run for all landmarks and cloud servers. The RTT 
+is measured and based on the measured times and the actual distance of the landmark from the server, 
+a line is estimated that can transform a measured time to distance. 
+We use the best fit line for this purpose. The line is calculated for three different challenge sizes. 
+
+\item Measure time: A cloud server claims to have a file in a certain region. 
+Then a number of landmarks are selected based on the location of the server. Then the landmarks 
+challenge response the cloud server and output their times. The times are transformed 
+to distances using the best fit lines from the previous phase.
+
+\item Region estimation: Using the distances from the previous phase, we have a number of 
+landmarks with known locations and their distance to the cloud server. Now we use a method called 
+trilaterarion to estimate the location (or region) of the cloud server.
+\end{itemize}
+
+\noindent{\bf Learning phase.}
+GAVEN did this part.\\
+
+\noindent{\bf Measure time.}
+To estimate the position of the server, a set of landmarks are chosen to
+challenge response the server and compute the RTT. For each landmark, we 
+run the protocol a few times (here n? times). Then the (minimum) time is
+converted into distance using the time-distance line from the learning
+phase. \\
+
+\noindent{\bf Region estimation.}
+Therefore we have a set of nodes with known location and their distance to the target server. 
+We can abstract this problem to a geometric problem, called trilateration. 
+Trilateration is the process of finding the location of a unknown point when its 
+distance to some known points is given. Trilateration estimates the centre
+point of each set of three landmarks with given distance from the centre
+point. We can summarize the problem as follows:\\
+
+\noindent{\bf Problem:} We have the distance of $t$ landmarks (with known location) to a server 
+with unknown location.\\
+\noindent{\bf Solution:} An estimation of the server location. The output can be a centre point or 
+a region. \\
+
+Here we are interested in locating the position 
+of a server which is residing on earth surface. We actually assume that the elevation 
+of the server on earth is zero. 
+
+This problem was investigated in GPS systems where a few GPS antennas want to estimate location 
+of an object by measuring the RTT of the signal sent to the GPS device. This measurement 
+is converted to distance and then trilateration is used to estimate the location of the GPS device.
+Our setting is different from GPS which works on wireless communication whereas our protocol 
+is on wired networks. We also do not consider elevation of the server. \\
+
+\noindent{\bf Our protocol.}
+Our protocol applies the appropriate transformations needed for trilateration on
+earth and then computes the centre point using Trilateration. Having a number
+of centre points, a circle is drawn around each of them and the number
+of centre points in the circle are counted. The output would be the
+centre point which has the highest number of centre points in its
+circle. We will discuss the ideal algorithm for region estimation in next section. 
+
+
+\subsection{Real World implementation problems and improvement ideas}
+The errors in our protocol comes from all three phases. \\
+
+\subsubsection{Learning phase error} 
+For the learning phase, we expected that the distance should not change for 
+different challenge sizes. This means that the best fit lines for different 
+challenge sizes must be parallel. However because of random behaviours in 
+computation time of the server and network delay (caused by routing, packet size, 
+and packet break down issues) we did not get completely parallel lines. 
+
+\subsubsection{Measure Time error}
+The same network and computation fluctuations from previous phase effected 
+the times measured in this phase. \\
+
+We have the following conclusions from the experiment for the first two phases:
+\begin{itemize}
+\item To measure the time, the POR is run for a number of times and then 
+we use the minimum time. We used minimum because the minimum time was more 
+consistent over different period of times that we ran the experiment and measure the time. 
+The average is always biased by some abnormal cases that effects the average time. For example, 
+we had computation times in the servers, that were even 1000,000 times more than the normal 
+computation time. We also tried the median, but minimum times were more consistent during different 
+period of time.
+
+\item Inaccuracy of the timing is a property of Planet Lab nodes, so 
+we do not expect these to exist in real landmarks. This inaccuracy comes 
+mostly from computation time fluctuations rather than network delays, so if 
+the server can guarantee a consistent computation time, we would expect better results. 
+\end{itemize}
+
+\noindent{\bf Improvement.} To remove the computation time effect, we can have one landmark run the 
+POR and verifies the file existence. Then other landmarks simply send a message to the server 
+and compute the RTT. This will eliminate the computation time fluctuations as 
+no landmark that is selected to measure the time will run the POR. 
+
+Also a good mechanism to filter the abnormal measurements may help reduce the errors in this phase.
+
+\subsubsection{Region estimation error}
+In this phase, we have a circle around the landmarks and we expect the right region for 
+the server is the region that is inside all circles, or more circles. So the best estimation 
+is the region with highest opacity (density of circles). 
+
+In this case, we have a system of non linear circle inequalities and we want to find
+the region with highest opacity (density):
+\[
+(x-a_i)^2 + (y-b_i)^2 \le r_i^2, i=1 \rightarrow \#circles.
+\]
+Note that the intersection area for all the circles may be null because 
+of error in time (or line) computation (the system may not have a solution) 
+so we are looking for the highest
+density region, the region that is contained in most circles.
+
+However as implementing this algorithm was hard for more than 3 circles, we implemented an 
+approximation of this algorithm that find the centre points. We expect that the centre point that 
+we find is inside the region that has the highest opacity inside the circles. Therefore, our method 
+is a good approximation of the server location. But calculating the highest opacity region 
+is a more reliable method as it is closer to our intuition for the region that server resides in.
+This may introduce some error in our computations. \\
+
+\noindent{\bf Improvement.} The error in this phase can be reduced by the following changes:
+\begin{itemize}
+\item If we consider the minimum time, we get a circle around each landmark. One improvement can be 
+considering minimum and median times (best fit lines given from minimum and median times) 
+to get two distances. This will give us a ring around each landmark rather than a circle. 
+However finding the intersection of rings can be even harder than circles.
+
+\item Selecting the landmarks carefully around the server. For now, we choose the 10 closest 
+landmarks around the server. But an improvement can be to consider the landmarks around the server 
+such that they make a shape close to a circle.
+
+\item Find the best number for the landmarks around the server. Is 10 the optimum case? 
+In general, a good algorithm to select the landmarks around the server may reduce the error.
+
+\item Our method of finding the centre point can also be improved. We can output the three 
+centre points with highest number of centre points inside. In this case, we expect to server 
+to be close to the triangle that these three centre points make.
+\end{itemize}
+
+\subsection{Implementation languages}
+We implemented the main POR protocol in C/C++. The experiment is run through a number of 
+bash scripts and the final region of the server is calculated by a python script. The python 
+script implements the third phase, i.e. trilateration and estimation of the centre point.
+
+\bibliographystyle{alpha}
+\bibliography{momeni}
+\end{document}

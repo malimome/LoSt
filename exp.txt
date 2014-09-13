@@ -1,0 +1,106 @@
+-----------------
+Aim:
+=================
+
+We wish to verification the location of our files in the cloud.  Our scheme will combine a PoR (proof of retrievability) scheme and a geolocation scheme.  
+
+A PoR is a challenge-response protocol which verifies that a file is being stored.
+
+A geolocation scheme translates the round trip times between "landmark nodes" (with known locations) and a node (with unknown location) into distances and then uses triangulation to determine the location of the measured node.
+
+In the experiment we want to study how the time to compute a PoR response (at the measured node) affects are ability to accurately translate round trip times into distances.
+
+(We will only concentrate on nodes in north america and europe.)
+
+
+-----------------
+Setup:
+=================
+
+Planetlab nodes:
+-----------------
+Currently using nodes at the following locations:
+University of California, Santa Cruz
+University of Illinois at Urbana-Champaign
+University of Michigan
+Cornell University
+Iowa State University Electrical and Computer Engineering
+University of Wisconsin
+University of Texas at Arlington
+University of Nebraska - Lincoln
+Instituto Superior Tecnico
+Humboldt-Universitaet zu Berlin - IWI
+Ege Universitesi - International Computer Institute
+University of Connecticut
+The University of Hong Kong
+University of Pittsburgh
+University of Arizona
+Nagoya Institute of Technology
+University of Victoria
+Michigan Technological University
+
+Eliminate the following bad nodes and Asian Nodes:
+cornell --  planetlab4-dsl.cs.cornell.edu
+iowa --  planetlab-4.ece.iastate.edu
+arizona --  planetlab1.arizona-gigapop.net
+colorado --  planetlab2.cs.colorado.edu
+victoria --  pl3.planetlab.uvic.ca
+conneticut --  planetlab1.engr.uconn.edu
+nitech --  planet2.pnl.nitech.ac.jp
+hong kong --  planetlab1.eee.hku.hk
+
+Add the following nodes in Western US and Europe:
+west US (choose 4 if possible):
+washington state --  eccs.wsu.edu
+uni of oregon --  netsec.cs.uoregon.edu
+google --  google.com
+stanford --  cs.stanford.edu
+UofCalifornia, Davis --  engineering.ucdavis.edu
+Berkley --  cs.berkley.edu
+
+Europe (choose 1 from each group):
+university college london --  ucl.ac.uk
+imperial college london --  imperial.ac.uk
+university of sussex --  informatics.susx.ac.uk
+HP labs, bristol --  hpl.hp.com/bristol
+--------------------
+france telecom R&D --  rdfrancetelecom.com
+CWI --  cwi.nl
+INRIA Onelab --  www-sop.inria.fr
+--------------------
+trinity college dublin --  scss.tcd.ie
+university college dublin --  csi.ucd.ie
+
+
+
+Amazon EC2
+--------------
+In the final part of the experiment we will aim to verify the location of a file stored in 3 different amazon regions.  For this we will need a virtual machine in the following three amazon regions: US-west, US-east and Europe.
+
+
+POR
+--------------
+The PoR we shall use will be the privately verifiable scheme by Shacham and Waters.
+We can either use the implementation by Sanchit or the one given on google code by Z. Peterson of Postgrad Naval College (https://code.google.com/p/compact-proofs-of-retrievability/).
+
+
+
+---------------
+Experiments:
+===============
+
+Learning phase 1: (timing file retreival)
+-For every pair of planetlab nodes A,B
+-Measure the time for A to retrieve the first line of a file stored at B.
+-We can then use the times to find a line of best fit which translates time into distance.
+
+Learning phase 2: (timing with POR)
+-For every pair of planetlab nodes A,B
+-Measure the time for B to respond to a PoR challenge issued by A.
+-We can then use the times to find a line of best fit which translates time into distance.
+
+Location Verification:
+-In each of the amazon regions: US-east, US-west and Europe create a virtual machine that will be viewed as a storage server.
+-Using the planetlab nodes we find time measurements to the virtual machine in each of the regions for both the basic file retrieval case and the PoR case.
+-Using the equations for our best-fit lines for the two cases we can then geolocate each virtual machine using triangulation.
+-we can then study the difference between the areas we obtain in the basic file retrieval case, the PoR case and the actual Region itself for each virtual machine.

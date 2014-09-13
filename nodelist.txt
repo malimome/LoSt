@@ -1,0 +1,3 @@
+planetlab1.cs.pitt.edu
+planetlab3.wail.wisc.edu
+planetlab2.uta.edu

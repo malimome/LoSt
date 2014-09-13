@@ -1,0 +1,32 @@
+This code is written by Mohsen Alimomeni. But the following POR implementation was used.
+---------------------------------------------------------------------------------------
+The software POR_SW_private is an implementation of the Shacham-Waters private scheme of the Proof of Retrievability (POR).
+
+The scheme is implemented exactly as described in their paper "Compact Profs of Retreivability". (http://www.springerlink.com/content/q0506q5r27352599/)
+
+The code is written in C++ and compiled using GNU GCC compiler
+
+The follwoing open source libraries needs to be installed for compiling:
+
+1. GNU Multiple Precision Arithmetic library (GMP library)   (http://gmplib.org/)
+ 
+2. OpenSSL Library (http://www.openssl.org)
+
+The runtime parameters (those controlled by the user) are:
+
+1. str: location of the input file
+
+2. l: size of the challenge set
+
+3. seed: number to initialize the C++ inbuilt random number generator
+
+For compiling, use the provided makefile. (Just run "make") 
+
+For execution, run the generated executable file main.exe. (using "./main")
+
+Written by Sanchit Agarwal (sanchit_ag@ismu.ac.in)
+July 2011.
+
+
+
+
